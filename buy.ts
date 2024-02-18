@@ -203,20 +203,20 @@ export async function processRaydiumPool(
     await buy(id, poolState);
 
 
-    const AUTO_SELL = retrieveEnvVariable('AUTO_SELL', logger);
-    if (AUTO_SELL === 'true') {
-      // wait for a bit before selling
-      const SELL_DELAY = retrieveEnvVariable('SELL_DELAY', logger);
-      const timeout = parseInt(SELL_DELAY, 10);
-      await new Promise((resolve) => setTimeout(resolve, timeout));
+    // const AUTO_SELL = retrieveEnvVariable('AUTO_SELL', logger);
+    // if (AUTO_SELL === 'true') {
+    //   // wait for a bit before selling
+    //   const SELL_DELAY = retrieveEnvVariable('SELL_DELAY', logger);
+    //   const timeout = parseInt(SELL_DELAY, 10);
+    //   await new Promise((resolve) => setTimeout(resolve, timeout));
 
-      // log poolstate info
-      // logger.info({ poolState }, `Pool state info`);
+    //   // log poolstate info
+    //   // logger.info({ poolState }, `Pool state info`);
 
-      await sell(id, poolState);
-    }
+    //   await sell(id, poolState);
+    // }
 
-    // await sell(id, poolState);
+    await sell(id, poolState);
   } catch (e) {
     logger.error({ ...poolState, error: e }, `Failed to process pool`);
   }
@@ -547,6 +547,26 @@ const runListener = async () => {
   logger.info(`Listening for raydium changes: ${raydiumSubscriptionId}`);
   logger.info(`Listening for open book changes: ${openBookSubscriptionId}`);
 
+  // post to discord webhook
+  const message = {
+    embeds: [
+      {
+        title: `Off we go! 🚀`,
+        description: `Happy sniping!`,
+        color: 1127128,
+      },
+    ],
+  };
+
+  const DISCORD_WEBHOOK = retrieveEnvVariable('DISCORD_WEBHOOK', logger);
+  // use native fetch to post to discord
+  fetch(DISCORD_WEBHOOK, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(message),
+  });
 
   if (USE_SNIPE_LIST) {
     setInterval(loadSnipeList, SNIPE_LIST_REFRESH_INTERVAL);
