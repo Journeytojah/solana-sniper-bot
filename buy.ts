@@ -52,8 +52,12 @@ import {
   ONE_TOKEN_AT_A_TIME,
 } from './constants';
 
+// Random unique identifier for your session changes every 5 minutes
+const SESSION_HASH = 'SSB' + Math.floor(Date.now() / (5 * 60 * 1000));
+
 const solanaConnection = new Connection(RPC_ENDPOINT, {
   wsEndpoint: RPC_WEBSOCKET_ENDPOINT,
+  httpHeaders: { 'x-session-hash': SESSION_HASH },
 });
 
 export interface MinimalTokenAccountData {
@@ -74,8 +78,6 @@ let quoteAmount: TokenAmount;
 let quoteMinPoolSizeAmount: TokenAmount;
 let quoteMaxPoolSizeAmount: TokenAmount;
 let processingToken: Boolean = false;
-
-
 
 let snipeList: string[] = [];
 
@@ -445,8 +447,8 @@ function loadSnipeList() {
 
 function shouldBuy(key: string): boolean {
   logger.info(`-------------------🤖🔧------------------- `);
-  logger.info(`Processing token: ${processingToken}`)
-  return USE_SNIPE_LIST ? snipeList.includes(key) : ONE_TOKEN_AT_A_TIME ? !processingToken : true
+  logger.info(`Processing token: ${processingToken}`);
+  return USE_SNIPE_LIST ? snipeList.includes(key) : ONE_TOKEN_AT_A_TIME ? !processingToken : true;
 }
 
 const runListener = async () => {
